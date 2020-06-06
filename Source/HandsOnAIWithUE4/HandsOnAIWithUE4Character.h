@@ -4,7 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "BehaviorTree/BehaviorTree.h"
 #include "HandsOnAIWithUE4Character.generated.h"
+
 
 UCLASS(config=Game)
 class AHandsOnAIWithUE4Character : public ACharacter
@@ -28,6 +30,10 @@ public:
 	/** Base look up/down rate, in deg/sec. Other scaling may affect final rate. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
 	float BaseLookUpRate;
+
+	//** Behavior Tree for an AI Controller (Added in Chapter 2)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = AI)
+		UBehaviorTree* BehaviorTree;
 
 protected:
 

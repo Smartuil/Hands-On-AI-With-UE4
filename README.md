@@ -516,3 +516,198 @@ AI开发人员仅仅知道行为树如何工作是不够的:他/她需要知道�
 最后，我将我的项目命名为UnrealAIBook，如下面的截图所示。同样，您可以在以下链接中找到项目文件:http://hog.red/AIBook2019ProjectFiles (链接区分大小写):
 
 ![](Images/2.17.jpg)
+
+# 从AI Controllers开始我们的行为树
+现在我们已经了解了行为树是什么以及它们由什么组成的，接下来让我们创建自己的行为树。回想上一章，负责拥有和控制Pawn的是AI Controller。因此,我们的行为树应该运行在AI Controller上。
+
+我们有两种方法。第一个是使用蓝图。通常，即使您是一名程序员，也最好使用蓝图，因为逻辑很简单，控制器也很简单。另一方面，如果您是一个C++爱好者，并且希望尽可能多地使用它，即使是用于小任务，请不用担心——我将再次创建相同的逻辑，但这次是在C++中。在任何情况下，行为树资产都应该在编辑器中创建和修改。最终编程的节点与默认可用的节点不同(我们将在本书后面看到这一点)，但树本身总是在编辑器中创建的。
+
+## 创建行为树和黑板
+首先，我们需要创建四个蓝图类:AI Controller，Character，行为树和黑板。稍后我们将介绍AI Controller。如果您选择了第三人称模板，那么您应该已经拥有了Character。因此，您只需要创建一个行为树和一个黑板上。
+
+在内容浏览器中，创建一个新文件夹并将其命名为Chapter2。这将有助于保持事情井井有条。然后，创建一个子文件夹并命名为AI。因此，我们可以保持我们的项目整洁，并确保我们不会将本章的项目与我们可能创建的其他非AI相关的类和/或对象混淆。我们将把为AI创建的所有资产放在这个文件夹中。
+
+### 创建黑板
+现在，我们需要添加一个黑板，它应该总是在AI文件夹中。为此，转到内容浏览器并选择Add New > Artificial Intelligence > Blackboard。
+
+现在，我们将黑板命名为BB_MyFirstBlackboard。在这里，我使用命名约定，以BB_作为所有黑板的前缀。除非您有特殊的理由不遵循此命名约定，否则请使用它。通过这样做，您将与本书的其余部分同步。
+
+![](Images/2.18.jpg)
+
+### 创建行为树
+让我们通过进入内容浏览器并选择add来添加行为树Add New > Artificial Intelligence > Behavior Tree，如下图截图:
+
+![](Images/2.19.jpg)
+
+现在，我们将命名行为树为BT_MyFirstBehaviorTree。同样，在这里，我使用了一个特定的命名约定，以BT_作为所有行为树资产的前缀。同样，请遵循命名约定，除非您有特殊的理由不这样做。
+
+当您打开行为树窗口时，您将看到一个根节点,如下:
+
+![](Images/2.20.jpg)
+
+根是行为树的执行开始的地方(从上到下，从左到右)。根本身只有一个引用，即黑板，所以它不能和其他东西连接。它是树的顶端，所有后续节点都在它下面。
+
+如果从根节点拖动，就可以添加复合节点：
+
+![](Images/2.21.jpg)
+
+为此，行为树编辑器非常直观。可以继续从节点中拖出以添加复合或任务节点。添加一个装饰器或服务，您可以右键单击节点并选择“Add Decorator…”或“Add”服务……”，分别如下图所示:
+
+![](Images/2.22.jpg)
+
+最后，如果单击一个节点，则可以在详细信息面板看到 具体参数(下面的截图显示了一个例子):
+
+![](Images/2.23.jpg)
+
+## 在AI Controller中执行行为树
+下一步是从AI Controller执行行为树。通常，这是一项简单的任务，可以在蓝图中实现(在蓝图中可以直接引用特定的行为树)。即使我们有一个复杂的C++ AI Controller，我们也可以在蓝图中扩展AI Controller并从中执行行为树蓝图。在任何情况下,如果硬引用不工作(如您使用C++或因为你想拥有更大的灵活性),然后你就可以在行为树中存储Character/Pawn,这需要执行特定行为树,当AI Controller拥有Pawn时进行检索。
+
+让我们探讨如何在蓝图中实现这两个功能(我们将引用行为树中的一个变量，在其中我们可以决定默认值)和(我们将在Character中存储行为树)。
+
+### 蓝图中的AI Controller
+我们可以通过点击Add New | BlueprintClass | AI Controller。你必须点击所有的类并搜索AI Controller来访问它。你可以在下面的截图中看到一个例子:
+
+![](Images/2.24.jpg)
+
+现在，命名我们的AI Controller为BP_MyFirstAIController。双击它以打开蓝图编辑器。
+
+首先，我们需要创建一个变量，以便存储行为树。虽然没有必要保持对行为树的引用，但是这样做是一个好的实践。要创建一个变量，我们需要在我的蓝图面板中按下变量标签旁边的+ Variable按钮，如下图所示(记住，你的光标需要在变量标签上才能显示按钮):
+
+![](Images/2.25.jpg)
+
+然后，您需要选择行为树变量类型并给它一个名称，比如BehaviorTreeReference。你的变量应该是这样的:
+
+![](Images/2.26.jpg)
+
+然后，在详细面板中，我们将设置默认值(记住，设置默认值需要对蓝图进行编译):
+
+![](Images/2.27.jpg)
+
+然后，我们需要重写On Possess函数，如下图所示:
+
+![](Images/2.28.jpg)
+
+最后，在AI Controller的事件Event On Possess 中，我们需要开始运行/执行行为树。我们可以使用以下简单的节点来实现这一点，名为Run Behavior Tree:
+
+![](Images/2.29.jpg)
+
+因此，你的AI Controller将能够执行存储在BehaviorTreeReference中的行为树。
+
+### C++中的AI Controller
+如果您决定用C++创建这个简单的AI Controller，让我们开始吧。我假设你的虚幻编辑器已经设置在C++工作(例如，你有安装了Visual Studio，调试的符号等等…这里有一个参考链接，你可以开始:https://docs.unrealengine.com/en-us/Programming/QuickStart)， 同时你有基本的如何在Unreal使用C++的知识。下面是命名约定的链接，以便您理解为什么一些类在代码中使用字母作为前缀: https://docs.unrealengine.com/en-us/Programming/Development/CodingStandard。
+
+在开始之前，请记住，为了在C++中处理AI，需要在.cs文件中添加公共依赖项(在本例中为UnrealAIBook.cs)，并添加GameplayTasks和AIModule作为公共依赖，如下代码所示:
+
+```C#
+PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "HeadMountedDisplay", "GameplayTasks", "AIModule" });
+```
+
+这将确保您的代码在编译时没有问题。
+
+让我们创建一个新的C++类，如下面的截图所示:
+
+![](Images/2.30.jpg)
+
+该类需要从AI Controller类继承。您可能需要勾选右上角的“显示所有类”复选框，然后使用搜索栏，如下面的截图所示:
+
+![](Images/2.31.jpg)
+
+单击Next并将类命名为MyFirstAIController。此外，我建议你保持我们项目的整洁。因此，单击Choose Folder按钮。虚幻将提示你去你的系统文件夹资源管理器。在这里，创建一个名为AI的子文件夹。选择这个文件夹作为存储我们将要创建的代码段的地方。在你点击创建之前，对话框应该是这样的:
+
+![](Images/2.32.jpg)
+
+现在，单击Create并等待编辑器加载。你可能会看到这样的东西:
+
+![](Images/2.33.jpg)
+
+与蓝图版本相比，代码的结构将略有不同。事实上，我们不能直接从AI Controller类中分配行为树(主要是因为很难直接引用它);相反，我们需要从Character上获取。正如我前面提到的，当您使用蓝图时，这也是一个很好的方法，但是由于我们选择了一个C++项目，我们应该看看一些代码。在Visual Studio中打开UnrealAIBookCharacter.h文件，在公共变量下面，添加以下代码行:
+
+```C++
+//** Behavior Tree for an AI Controller (Added in Chapter 2)
+UPROPERTY(EditAnywhere, BlueprintReadWrite, category=AI)
+UBehaviorTree* BehaviorTree;
+```
+
+对于那些还不熟悉的人，这里有一个更大的代码块，这样你就可以理解把前面的代码放在类的哪里:
+
+```C++
+public:
+     AUnrealAIBookCharacter();
+    /** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
+     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
+     float BaseTurnRate;
+    /** Base look up/down rate, in deg/sec. Other scaling may affect final rate. */
+     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
+     float BaseLookUpRate;
+    //** Behavior Tree for an AI Controller (Added in Chapter 2)
+     UPROPERTY(EditAnywhere, BlueprintReadWrite, category=AI)
+     UBehaviorTree* BehaviorTree;
+```
+
+此外，为了编译前面的代码，我们还必须在类的顶部包括下面的语句，就在.generated上面:
+
+```C++
+#include "CoreMinimal.h"
+#include "GameFramework/Character.h"
+#include "BehaviorTree/BehaviorTree.h"
+#include "UnrealAIBookCharacter.generated.h"
+```
+关闭Character类，因为我们已经完成了它。因此，每当我们在世界中放置一个Character的实例时，我们就能够从细节面板中指定一个行为树，如下面的截图所示:
+
+![](Images/2.34.jpg)
+
+让我们打开新创建的AI Controller的头文件(.h)(如果你使用VS作为IDE，它应该已经在Visual Studio中打开了)。特别是，我们需要重写AI Controller类的一个函数。我们要覆盖的函数叫做Possess()，它允许我们在AI中运行一些代码操控者拥有一个新的Pawn(也就是说，当它控制角色时，这个角色是一个Pawn)。添加以下粗体代码(在受保护的可见性内):
+
+```C++
+UCLASS()
+class UNREALAIBOOK_API AMyFirstAIController : public AAIController
+{
+     GENERATED_BODY()
+ 
+protected:
+  //** override the OnPossess function to run the behavior tree.
+  void OnPossess(APawn* InPawn) override;
+};
+```
+
+接下来，打开实现(.cpp)文件。再一次，使用行为树，我们必须包括行为树和UnrealAIBookCharacter类:
+
+```C++
+#include "MyFirstAIController.h"
+#include "UnrealAIBookCharacter.h"
+#include "BehaviorTree/BehaviorTree.h"
+```
+
+接下来，我们需要为 Possess()函数写一个功能。我们需要检查Pawn是否真的是一个UnrealAIBookCharacter，如果是，我们检索行为树并运行它。当然，这是一个if语句，以避免我们的指针为nullptr:
+
+```C++
+void AMyFirstAIController::OnPossess(APawn* InPawn)
+{
+  Super::OnPossess(InPawn);
+  AUnrealAIBookCharacter* Character = Cast<AUnrealAIBookCharacter>(InPawn);
+  if (Character != nullptr)
+  {
+    UBehaviorTree* BehaviorTree = Character->BehaviorTree;
+    if (BehaviorTree != nullptr) {
+      RunBehaviorTree(BehaviorTree);
+    }
+  }
+}
+```
+
+一旦我们编译了我们的项目，我们将能够使用这个控制器。在关卡中选择我们的AI character(如果你没有它，你可以创建一个)，这一次，在细节面板中，我们可以设置C++控制器，如下所示:
+
+![](Images/2.35.jpg)
+
+另外，不要忘记在细节面板中设置行为树:
+
+![](Images/2.36.jpg)
+
+因此，一旦游戏开始，敌人将开始执行行为树。目前，树是空的，但这提供了我们需要的结构，以便我们可以开始使用行为树。在接下来的章节中，我们将更详细地探索行为树，特别是在第8、9和第8章10、在那里我们将看到一个更实际的方法来设计和建造行为树。
+
+# 总结
+在本章中，我们已经介绍了什么是行为树以及它们所包含的一些内容，包括任务、装饰器和服务。接下来，我们学习了黑板以及如何将它们与行为树集成。然后，我们创建了一个行为树，并学习了如何让它从一个AI控制器开始(在蓝图和C++中)。通过这样做，我们已经构建了为我们提供关键内容的基础，以便我们可以处理这本书的其他部分。
+
+因此，在本书中我们会遇到更多的行为树，而你也有机会掌握它们。但在那之前，我们需要先了解一些特定的话题。一旦我们有了导航和感知的基础(包括EQS)，我们可以遍历行为树来理解组合节点的角色，以及装饰器和任务。此外，我们将能够创造自己的。第8、9和10章将指导您从头开始，从设计阶段到实现阶段创建行为树的过程。
+
+但在那之前，让我们进入下一章，我们将要讨论的导航和寻路!

@@ -76,7 +76,6 @@ void AHandsOnAIWithUE4Character::SetupPlayerInputComponent(class UInputComponent
 	PlayerInputComponent->BindAction("ResetVR", IE_Pressed, this, &AHandsOnAIWithUE4Character::OnResetVR);
 }
 
-
 void AHandsOnAIWithUE4Character::OnResetVR()
 {
 	UHeadMountedDisplayFunctionLibrary::ResetOrientationAndPosition();
