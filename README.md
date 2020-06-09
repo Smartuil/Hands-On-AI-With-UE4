@@ -12,7 +12,7 @@
 - 第五章 代理感知
 - 第六章 扩展行为树
 - 第七章 集群
-# 第一章 迈向AI世界的第一步
+# 迈向AI世界的第一步
 从bronze giant Talos，到符号系统和神经网络：人工智能是如何被塑造和用于电子游戏的。
 
 各位读者，欢迎来到人工智能（简称AI）之旅的开始。你有没有想过那些在魔兽世界辛勤工作的peons是如何探索复杂的地图的？或者，那些在《吃豆人》里神采奕奕的鬼魂怎么能把你带到任何地方？或者你的对手在最终幻想中如何优化他们的攻击来屠杀你的队伍？
@@ -956,3 +956,278 @@ UNavArea_Desert::UNavArea_Desert()
 要用一个链接连接两个区域，我们需要在Mode面板All Classes选项卡，选择Nav Link Proxy，如下图所示:
 
 ![](Images/3.25.jpg)
+
+一旦链接被放置在关卡中，你会看到一个“箭头/链接”，你可以修改链接的起始点和结束点。它们被称为Left和Right，设置它们位置的最简单的方法是将它们拖放到视窗中。因此，你将能够连接Nav网格的两个不同部分。正如我们在下面的截图中看到的，如果Nav网格是可见的(用P键启用)，你会看到一个箭头连接左右节点。这个箭头指向两个方向。这将导致链接是双向的:
+
+![](Images/3.26.jpg)
+
+![](Images/3.27.jpg)
+
+如果你想让链接只在一个方向上运行，我们可以在细节面板中改变这个设置。但是，要研究这些设置，我们首先需要了解有两种不同类型的链接:简单链接和智能链接。
+
+#### 简单链接和智能链接
+当我们创建一个Nav Link Proxy，它带来了一个简单的链接数组。这意味着与一个单一的Nav Link Proxy，我们可以连接的不同部分Nav交织在一起时。然而，Nav Link Proxy带来了一个单一的智能链接，默认情况下是禁用的。
+
+让我们来学习简单链接和智能链接之间的异同。
+
+##### Both Simple and Smart Links
+简单链接和智能链接的行为方式相似，它们将导航网的两个部分连接在一起。此外，这两种类型的链接都可以有方向(从左到右，从右到左，或者双向)和Nav Area(链接所在的导航区域;例如，在使用此链接时，您可能希望可以自定义cost)。
+
+##### 简单链接
+简单链接存在于Nav Proxy Link中的Point Links Array中，这意味着在一个Nav Proxy Link中可能存在多个简单链接。要创建另一个简单链接，可以向数组中添加额外的元素细节面板中的简单节点，如下面的截图所示:
+
+![](Images/3.28.jpg)
+
+一旦我们有了更多的简单链接，我们就可以设置开始和结束位置，就像我们对第一个链接所做的那样(通过选择它们并像其他actor一样在Viewport中移动它们)。下面的屏幕截图显示了我放置了两个简单的链接在Nav Proxy Link旁边:
+
+![](Images/3.29.jpg)
+
+对于Point Links Array中的每个简单链接，我们都可以通过展开项来访问其设置。下面的截图显示了第一个简单链接的设置:
+
+![](Images/3.30.jpg)
+
+让我们来了解一下这些不同的设置:
+- **Left and Right**：链接的左右两端的位置。
+- **Left Project Height and Right Project Height**：如果该数字大于零，则链接将分别向下投影到左侧和的导航几何图形(使用由该数字指定的最大长度的跟踪)链接的右端。你可以在下面的截图中看到这个投影链接:
+
+![](Images/3.31.jpg)
+
+- **Direction**：这指定了链接工作的方向。同时，视窗中的箭头也会相应地更新。可能的选择如下:
+    - **Both Ways**：链接是双向的(记住AI需要具备双向穿越链路的能力;例如，如果我们要越过一个平台，则代理需要能够从其上跌落（链路的一个方向）并跳跃（链路的另一个方向）。
+    - **Left to Right**：该链接只能从左端到右端(代理仍然需要能够沿着该链接方向前进)。
+    - **Right to Left**：该链接只能从右端到左端(代理仍然需要能够沿着该链接方向前进)。
+- **Snap Radius and Height Radius**：你可能已经注意到每个链接末端都有一个圆柱体。这两个设置控制半径和圆柱体的高度。检查cost最小的区域，以获得关于此圆柱使用的更多信息。下面的截图显示，第一个链接有一个更大的圆柱体(半径和更高):
+
+![](Images/3.32.jpg)
+
+- **Description**：这只是一个字符串，为了方便你可以插入描述;它对导航或链接没有影响。
+- **Snap to Cheapest Area**：如果启用，它将尝试将链接末端连接到圆柱内可用三角形中cost最小的区域，该区域由单元半径和高度半径指定。例如，如果圆柱体与Default Nav Area和BPJungle Nav Area都相交(我们之前创建的)，该链接将直接连接到Default Nav Area，而不是丛林。
+- **Area Class**：该链接可能需要有一定的cost才能穿过，或者具有特定的Nav Area。此参数允许您定义穿过该链接时属于哪种类型的Nav Area。
+
+这就是简单链接。然而，这是一个非常强大的工具，可以让你构造Nav Mesh，并实现惊人的AI行为。现在，让我们进入智能链接。
+
+##### 智能链接
+可以在运行时使用“Smart Link Is Relevant”启用和禁用“智能链接”。您还可以通知周围的Actors。默认情况下，它是不相关的，每个Nav Proxy Link只有一个智能链接。
+
+不幸的是(至少对于当前的引擎版本)，这些在编辑器中是不可见的，这意味着需要手动设置开始和结束位置。
+
+不过，让我们来看看智能链接的设置：
+
+![](Images/3.33.jpg)
+
+- **Enabled Area Class**：这是该链接启用时默认的Nav Area。默认值是NavArea_Default。
+- **Disabled Area Class**：这是链路被禁用时假定的Nav Area。这意味着，当链接被禁用时，如果分配了一个可交叉的区域，它仍然可以穿过(例如，当链接被禁用时，我们可能希望有一个非常高的成本，但我们仍然希望它是可以穿过的。当然，默认值是NavArea_Default，这意味着它是不可穿过的）。
+- **Link Relative Start**：这表示链接的起点，相对于它的Nav Link Proxy的位置。
+- **Link Relative End**：这表示链接的终点，相对于它的Nav Link Proxy的位置。
+- **Link Direction**：这指定了链接工作的方向。可能的选择如下:
+    - **Both Ways**：链路是双向的(记住AI需要具备双向穿越链路的能力;例如，在一个突出的地方，代理人需要能够从上面掉下来(链接的一个方向)和跳跃(链接的另一个方向)。
+    - **Left to Right**：该链接只能从左端到右端(代理仍然需要能够沿着该链接方向前进)。
+    - **Right to Left**：该链接只能从右端到左端(代理仍然需要能够沿着该链接方向前进)。
+- **Link Enabled**：这是一个布尔变量，它决定是否智能启用链接。这个值可以在运行时更改，链接也可以更改“通知”周围对这些信息感兴趣的代理/参与者(更多信息请参阅后面)。默认值为true。
+- **Smart Link Is Relevant**：这是一个布尔变量，用于确定智能链接是否实际处于“活动”状态，也就是说，它是否相关，或者我们是否应该忽略它。默认值为false。
+
+这些是关于智能链接的主要设置。
+
+值得一提的是，智能链接实际上可以做的不仅仅是Nav Meshes。它们有一系列函数来处理穿过该代理链接。例如，通过打开NavLinkProxy.h文件，我们可以找到以下函数:
+
+```C++
+  /** called when agent reaches smart link during path following, use ResumePathFollowing() to give control back */
+  UFUNCTION(BlueprintImplementableEvent)
+  void ReceiveSmartLinkReached(AActor* Agent, const FVector& Destination);
+
+  /** resume normal path following */
+  UFUNCTION(BlueprintCallable, Category="AI|Navigation")
+  void ResumePathFollowing(AActor* Agent);
+
+  /** check if smart link is enabled */
+  UFUNCTION(BlueprintCallable, Category="AI|Navigation")
+  bool IsSmartLinkEnabled() const;
+
+  /** change state of smart link */
+  UFUNCTION(BlueprintCallable, Category="AI|Navigation")
+  void SetSmartLinkEnabled(bool bEnabled);
+
+  /** check if any agent is moving through smart link right now */
+  UFUNCTION(BlueprintCallable, Category="AI|Navigation")
+  bool HasMovingAgents() const;
+  ```
+
+不幸的是，这些函数超出了本书的范围，但我邀请您阅读代码以了解更多关于它们的知识。
+
+在前面，我们提到智能链接可以在运行时向附近的代理/参与者广播关于其状态更改的信息。您可以使用广播设置更改智能链接广播此信息的方式，广播设置位于智能链接设置的正下方：
+
+![](Images/3.34.jpg)
+
+这些设置相当直观，但让我们快速浏览一下:
+- **Notify when Enabled**:如果为true，则链接将在启用时通知代理/参与者。
+- **Notify when Disabled**:如果为true，则链接将在禁用时通知代理/参与者。
+- **Broadcast Radius**：它指定广播应该走多远。此半径以外的每个代理都不会收到有关链接更改的通知。
+- **Broadcast Interval**：这将指定链接应在多长时间后重复广播。如果该值为零，则广播仅重复一次。
+- **Broadcast Channel**：这是用于更改广播的跟踪通道。我们关于智能链接的讨论到此结束。
+
+#### Nav Link Proxy的其他设置
+最后，值得一提的是，Nav Link Proxy 可以在生成Nav网格时创建一个障碍框。您可以在Nav Link Proxy 的详细信息面板中找到这些设置，如以下屏幕截图所示：
+
+![](Images/3.35.jpg)
+
+这些设置允许你决定障碍框是否活动/使用，它的尺寸/范围和偏移量，以及导航区域的类型。
+
+#### 扩展Nav Link Proxy
+如果您想知道是否可以扩展链接或将它们包含在更复杂的actors中，那么答案是“当然可以!”但是你只能在C++中扩展它们。
+
+因为这本书不能涵盖一切，所以我们没有时间详细讨论这个问题。但是，您可能希望扩展Nav Link Proxy 的一些原因是为了更好地控制输入链接的characters。例如，您可能需要一个跳板来推动character通过链接。这并不复杂，如果你在网上搜索，你会发现很多关于如何使用导航链接来完成这项工作的教程。
+
+只要记住，要成为一个好的AI程序员，你将最终需要掌握这部分导航链接，但现在，足够我们用了。
+
+### 导航中的避障
+导航避障是一个非常广泛的话题，虚幻有一些子系统为我们做这个。因此，我们将在第6章“集群”中讨论这个话题。
+
+### Navigation Filter
+我们不想每次都以同样的方式找到一条路。想象一下，我们的强化了人工智能代理，它能够以两倍的速度穿越丛林。在这种情况下，导航系统不会意识到这种变化，也不会永久改变导航网格的形状或权重。
+
+Nav过滤允许我们定义具体的规则如何执行特定时期的路径发现。您可能已经注意到，每次我们执行导航任务时，无论是在蓝图还是C++中，都有一个可选参数用于插入Nav过滤器。下面是一些带有可选过滤器参数的蓝图节点(C++函数也是如此)的例子:
+
+![](Images/3.36.jpg)
+
+即便是行为树的Move To节点也有导航过滤器选项:
+
+![](Images/3.37.jpg)
+
+当然，一旦您插入了一个过滤器，寻路将相应地表现出来。这意味着使用Nav过滤器非常简单。但是，如何创建导航过滤器？让我们在蓝图和C++中找到答案。
+
+#### 在蓝图中创建Navigation Filter
+在本章之前，我们在蓝图中创建了一个丛林区域。因此，这似乎是一个很好的例子，我们可以使用它来创建一个Nav过滤器，允许AI代理更快地穿越丛林，甚至比穿越Nav网格的默认区域还要快。让我们想象一下，人工智能代理有某种力量或能力，可以让它在丛林型区域移动得更快。
+
+要在蓝图中创建Navigation Filter，我们需要开始创建继承自NavigationQueryFilter的新蓝图，如下图所示：
+
+![](Images/3.38.jpg)
+
+按照惯例，类的名称应该以“NavFilter_”开头。我们将把它命名为NavFilter_BPFastJungle（我添加了BP，这样我就可以记住，我用蓝图创建了这个，因为我们在蓝图和C++中有相同的任务）。这就是它在内容浏览器中的外观：
+
+![](Images/3.39.jpg)
+
+一旦我们打开蓝图，我们会在细节面板中找到它的选项:
+
+![](Images/3.40.jpg)
+
+如您所见，有一个Array of Areas和两个包含和排除（Nav）标志集。不幸的是，我们没有覆盖Nav Flags，因为它们超出了本书的范围，它们只能在C++中使用。然而，这些Array of Areas非常有趣。让我们添加一个新Area使用我们的NavArea_BPJungle创建Area类，如下面的截图所示:
+
+![](Images/3.41.jpg)
+
+现在，我们可以覆盖丛林区域的Travel Cost和Entering Cost，如果使用这个过滤器，将使用这些成本来代替我们在Area类中指定的成本。记住勾选选项名称旁边的复选框以启用编辑。例如，我们可以有0.6的Travel Cost(因为我们可以快速穿过丛林而没有任何问题)和Entering Cost为0:
+
+![](Images/3.42.jpg)
+
+如果你还遵循C++部分的Nav Areas，那么你也应该在你的项目中拥有沙漠区域。作为可选步骤，我们可以向过滤器添加第二个区域。想象一下，通过在丛林中使用更强的或快速移动的能力，我们的角色对太阳非常敏感，并且非常容易被太阳晒伤，这会显著降低他们的健康。因此，如果使用这种过滤器，我们可以为沙漠地区设定更高的成本。只需添加另一个区域，并将Area类设置为NavArea_Desert。然后，覆盖成本；例如，Travel Cost为2.5，Entering Cost为10：
+
+![](Images/3.43.jpg)
+
+完成设置编辑后，保存蓝图。从现在开始，您将能够在导航系统中使用这个过滤器。这就总结了如何在蓝图中创建一个导航过滤器。
+
+#### 在C++中创建Navigation Filter
+与蓝图类似，我们可以创建一个C++ Nav过滤器。这一次，我们可以创建一个过滤器，稍微降低沙漠地区的成本。你可以对生活在沙漠中的某些动物使用这个过滤器，这样它们就不容易受到它的影响。
+
+首先，我们需要创建一个新的C++类继承自NavigationQueryFilter,如下面的截图所示：
+
+![](Images/3.44.jpg)
+
+按照惯例，类的名称应该以“NavFilter_”开头。因此，我们将它重命名为NavFilter_DesertAnimal并将其放在“Chapter3/Navigation”:
+
+![](Images/3.45.jpg)
+
+要设置它的属性，我们需要创建一个默认构造函数。在头文件(.h)中写入以下内容:
+
+```C++
+#include "CoreMinimal.h"
+#include "NavFilters/NavigationQueryFilter.h"
+#include "NavFilter_DesertAnimal.generated.h"
+/**
+ * 
+ */
+UCLASS()
+class UNREALAIBOOK_API UNavFilter_DesertAnimal : public UNavigationQueryFilter
+{
+  GENERATED_BODY()
+  UNavFilter_DesertAnimal();
+};
+```
+
+对于实现（.cpp文件），我们需要做更多的工作。首先，我们需要进入我们需要的导航区域，在这种情况下，这就是沙漠。让我们添加以下“#include”语句：
+
+```C++
+#include "NavArea_Desert.h"
+```
+
+然后，在构造函数中，我们需要创建一个FNavigationFilterArea，它是一个包含筛选特定类的所有选项的类。在我们的例子中，我们可以将这个新的过滤器区域存储在一个名为Desert的变量中:
+
+```C++
+UNavFilter_DesertAnimal::UNavFilter_DesertAnimal() {
+  //Create the Navigation Filter Area
+  FNavigationFilterArea Desert = FNavigationFilterArea();
+  // [REST OF THE CODE]
+}
+```
+
+接下来，我们需要用我们想为这个类覆盖的选项填充Desert变量，包括我们要修改的Nav Area:
+
+```C++
+UNavFilter_DesertAnimal::UNavFilter_DesertAnimal() {
+  // [PREVIOUS CODE]
+ //Set its parameters
+  Desert.AreaClass = UNavArea_Desert::StaticClass();
+  Desert.bOverrideEnteringCost = true;
+  Desert.EnteringCostOverride = 0.f;
+  Desert.bOverrideTravelCost = true;
+  Desert.TravelCostOverride = 0.8f;
+  // [REST OF THE CODE]
+}
+```
+
+最后，我们需要在Area数组中添加这个Filter Area:
+
+```C++
+UNavFilter_DesertAnimal::UNavFilter_DesertAnimal() {
+  // [PREVIOUS CODE]
+  //Add it to the the Array of Areas for the Filter.
+  Areas.Add(Desert);
+}
+```
+
+为了您的方便，这里是完整的。cpp文件:
+
+```C++
+#include "NavFilter_DesertAnimal.h"
+#include "NavArea_Desert.h"
+UNavFilter_DesertAnimal::UNavFilter_DesertAnimal() {
+  //Create the Navigation Filter Area
+  FNavigationFilterArea Desert = FNavigationFilterArea();
+  //Set its parameters
+  Desert.AreaClass = UNavArea_Desert::StaticClass();
+  Desert.bOverrideEnteringCost = true;
+  Desert.EnteringCostOverride = 0.f;
+  Desert.bOverrideTravelCost = true;
+  Desert.TravelCostOverride = 0.8f;
+  //Add it to the the Array of Areas for the Filter.
+  Areas.Add(Desert);
+}
+```
+
+编译这段代码，下次需要使用导航系统时就可以使用这个过滤器了。关于导航过滤器的讨论到此结束。
+
+## 覆盖导航系统
+在Mode面板中，您可以拖动一个名为Nav System Config Override的特殊actor到关卡中。
+
+![](Images/3.46.jpg)
+
+该actor允许您通过使用另一个actor覆盖内置导航系统。当然，您必须首先开发它，这将需要大量的工作。
+
+![](Images/3.47.jpg)
+
+为什么要替换默认导航系统(或者可能与其他导航系统一起使用)，主要是因为要克服一些限制。那么空军呢?他们如何进行3D寻路?有地面寻路能力的蜘蛛呢?
+
+## 总结
+在本章中，我们了解了如何设置导航系统，以便我们的导航系统AI角色可以在地图上移动。特别地，我们已经学习了如何用Modifier Volumes，Nav Link Proxies和NavMesh来塑造导航网格区域。
+
+因此，我们的人工智能代理可以顺利地在地图中导航，高效地找到基于其优化的两点之间的路径(例如使用导航过滤器)，以适应不同类型的“地形”的地图(例如使用导航区域)。此外，他们还会在平台上摔倒或跳跃(比如使用Nav Link Proxies和一些跳跃代码)。
+
+在下一章中，我们将学习虚幻框架中更高级的人工智能特性，即环境查询系统，它允许代理“查询”环境，以便找到具有特定需求的位置(或actors)。
